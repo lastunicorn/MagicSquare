@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MagicSquare
+namespace DustInTheWind.MagicSquare
 {
     internal class SolutionFoundEventArgs : EventArgs
     {

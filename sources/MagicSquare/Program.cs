@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace MagicSquare
+namespace DustInTheWind.MagicSquare
 {
     internal static class Program
     {

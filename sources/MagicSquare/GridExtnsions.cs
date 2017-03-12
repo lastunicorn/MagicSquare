@@ -1,4 +1,4 @@
-﻿namespace MagicSquare
+﻿namespace DustInTheWind.MagicSquare
 {
     public static class GridExtnsions
     {

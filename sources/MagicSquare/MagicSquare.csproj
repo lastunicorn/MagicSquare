@@ -7,8 +7,8 @@
     <ProjectGuid>{BF35D809-A749-459A-A99A-F070DCD4C340}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MagicSquare</RootNamespace>
-    <AssemblyName>MagicSquare</AssemblyName>
+    <RootNamespace>DustInTheWind.MagicSquare</RootNamespace>
+    <AssemblyName>DustInTheWind.MagicSquare</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

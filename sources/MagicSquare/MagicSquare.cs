@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace MagicSquare
+namespace DustInTheWind.MagicSquare
 {
     internal sealed class MagicSquare
     {
@@ -135,7 +135,6 @@ namespace MagicSquare
         private void OnSolutionFound(SolutionFoundEventArgs e)
         {
             EventHandler<SolutionFoundEventArgs> eventHandler = SolutionFound;
-
             eventHandler?.Invoke(this, e);
         }
     }
