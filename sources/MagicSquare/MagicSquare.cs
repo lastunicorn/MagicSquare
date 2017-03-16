@@ -15,26 +15,25 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
-using System.Linq;
 
 namespace DustInTheWind.MagicSquare
 {
     internal sealed class MagicSquare
     {
         private readonly int n;
-        private readonly int[,] grid;
-        private readonly bool[] numbers;
+        private readonly Matrix grid;
+        private readonly Tokens numbers;
 
         public event EventHandler<SolutionFoundEventArgs> SolutionFound;
 
         public MagicSquare(int n)
         {
-            if (n <= 0) throw new ArgumentOutOfRangeException(nameof(n));
+            if (n < 3) throw new ArgumentOutOfRangeException(nameof(n));
 
             this.n = n;
 
-            grid = new int[n, n];
-            numbers = new bool[n * n];
+            grid = new Matrix(n);
+            numbers = new Tokens(1, n * n);
         }
 
         public void Calculate()
@@ -51,7 +50,7 @@ namespace DustInTheWind.MagicSquare
                     OnSolutionFound(eva);
                 }
 
-                bool nextStepSuccess = NextStep();
+                bool nextStepSuccess = Increment(n * n);
 
                 if (!nextStepSuccess)
                     break;
@@ -60,90 +59,67 @@ namespace DustInTheWind.MagicSquare
 
         private void Initialize()
         {
-            for (int i = 0; i < numbers.Length; i++)
-                numbers[i] = false;
-
-            FillGrid();
-            Increment(0);
-        }
-
-        private void FillGrid()
-        {
-            for (int i = 0; i < n; i++)
-                for (int j = 0; j < n; j++)
-                    grid[i, j] = 0;
+            numbers.Clear();
+            grid.Clear();
+            Increment(1);
         }
 
         private bool Validate()
         {
-            int rowCount = grid.GetLength(0);
-            int columnCount = grid.GetLength(1);
+            int sum = grid.D1Sum;
 
-            int[] rowSums = new int[rowCount];
-            int[] columnSums = new int[columnCount];
-            int d1Sum = 0;
-            int d2Sum = 0;
+            for (int i = 1; i <= n; i++)
+                if (grid.GetRowSum(i) != sum)
+                    return false;
 
-            for (int i = 0; i < rowCount; i++)
-                for (int j = 0; j < columnCount; j++)
-                {
-                    int value = grid[i, j];
+            for (int i = 1; i <= n; i++)
+                if (grid.GetColumnSum(i) != sum)
+                    return false;
 
-                    rowSums[i] += value;
-                    columnSums[j] += value;
-
-                    if (i == j)
-                        d1Sum += value;
-
-                    if (i + j == columnCount - 1)
-                        d2Sum += value;
-                }
-
-            return d2Sum == d1Sum && rowSums.All(x => x == d1Sum) && columnSums.All(x => x == d1Sum);
+            return grid.D2Sum == sum;
         }
 
-        private bool NextStep()
+        private bool Increment(int index)
         {
-            for (int i = n * n - 1; i >= 0; i--)
-            {
-                bool success = Increment(i);
-
-                if (success)
-                    return true;
-            }
-
-            return false;
-        }
-
-        private bool Increment(int i)
-        {
-            int currentNumber = grid.GetSnakeValue(i);
-            int currentNumberIndex = currentNumber - 1;
-
-            if (currentNumberIndex >= 0)
-                numbers[currentNumberIndex] = false;
-
             while (true)
             {
-                currentNumberIndex++;
-
-                if (currentNumberIndex >= numbers.Length)
-                {
-                    grid.SetSnakeValue(i, 0);
+                // If reached the beggining of the matrix -> matrix cannot be filled.
+                if (index == 0)
                     return false;
-                }
 
-                if (!numbers[currentNumberIndex])
+                // If reached the end of the matrix -> matrix is full.
+                if (index == n * n)
+                    return true;
+
+                // If 2 rows are full and their sum doeas not match, go back one step.
+                if (index == 2 * n + 1 && grid.GetRowSum(1) != grid.GetRowSum(2))
+                    index--;
+
+                //Console.WriteLine("-----------------------------------");
+                //Console.WriteLine("index = " + index);
+                //Console.WriteLine();
+                //Console.WriteLine(grid.ToString());
+
+                int currentNumber = grid.Get(index);
+                numbers.Free(currentNumber);
+
+                // Get the next number that can be used.
+
+                int? nextNumber = numbers.ObtainNext(currentNumber + 1);
+
+                if (nextNumber.HasValue)
                 {
-                    numbers[currentNumberIndex] = true;
-                    currentNumber = currentNumberIndex + 1;
+                    grid.Set(index, nextNumber.Value);
+                    //Console.WriteLine(grid.ToString());
 
-                    grid.SetSnakeValue(i, currentNumber);
+                    index++;
+                }
+                else
+                {
+                    grid.Set(index, 0);
+                    //Console.WriteLine(grid.ToString());
 
-                    if (i + 1 == n * n)
-                        return true;
-
-                    return Increment(i + 1);
+                    index--;
                 }
             }
         }

@@ -26,41 +26,27 @@ namespace DustInTheWind.MagicSquare
             int solutionCount = 0;
             Stopwatch stopWatch = Stopwatch.StartNew();
 
-            MagicSquare magicSquare = new MagicSquare(3);
-
-            magicSquare.SolutionFound += (sender, e) =>
+            using (SolutionFile solutionFile = new SolutionFile())
             {
-                solutionCount++;
-                DisplaySolution(e.Solution);
-            };
+                MagicSquare magicSquare = new MagicSquare(4);
 
-            magicSquare.Calculate();
-
-            Console.WriteLine("Solution count: " + solutionCount);
-            Console.WriteLine("Time: " + stopWatch.Elapsed);
-
-            Console.ReadKey(true);
-        }
-
-        private static void DisplaySolution(int[,] grid)
-        {
-            int rowCount = grid.GetLength(0);
-            int columnCount = grid.GetLength(1);
-
-            for (int i = 0; i < rowCount; i++)
-            {
-                for (int j = 0; j < columnCount; j++)
+                magicSquare.SolutionFound += (sender, e) =>
                 {
-                    Console.Write(grid[i, j]);
+                    solutionCount++;
 
-                    if (j < columnCount - 1)
-                        Console.Write(" ");
-                }
+                    Console.WriteLine(e.Solution.ToString());
+                    Console.WriteLine();
 
-                Console.WriteLine();
+                    solutionFile.DisplaySolution(e.Solution);
+                };
+
+                magicSquare.Calculate();
+
+                solutionFile.WriteStatistics(solutionCount, stopWatch.Elapsed);
             }
 
-            Console.WriteLine();
+            Console.Write("Press any key to continue...");
+            Console.ReadKey(true);
         }
     }
 }

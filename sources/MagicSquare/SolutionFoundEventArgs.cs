@@ -20,9 +20,9 @@ namespace DustInTheWind.MagicSquare
 {
     internal class SolutionFoundEventArgs : EventArgs
     {
-        public int[,] Solution { get; }
+        public Matrix Solution { get; }
 
-        public SolutionFoundEventArgs(int[,] solution)
+        public SolutionFoundEventArgs(Matrix solution)
         {
             if (solution == null) throw new ArgumentNullException(nameof(solution));
 
