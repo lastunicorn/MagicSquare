@@ -23,6 +23,7 @@ namespace DustInTheWind.MagicSquare
         private readonly int n;
         private readonly Matrix grid;
         private readonly Tokens numbers;
+        private readonly int targetSum;
 
         public event EventHandler<SolutionFoundEventArgs> SolutionFound;
 
@@ -34,6 +35,8 @@ namespace DustInTheWind.MagicSquare
 
             grid = new Matrix(n);
             numbers = new Tokens(1, n * n);
+
+            targetSum = (n * n + 1) * n / 2;
         }
 
         public void Calculate()
@@ -66,6 +69,8 @@ namespace DustInTheWind.MagicSquare
 
         private bool Validate()
         {
+            //grid.CalculateSums();
+
             int sum = grid.D1Sum;
 
             for (int i = 1; i <= n; i++)
@@ -88,11 +93,11 @@ namespace DustInTheWind.MagicSquare
                     return false;
 
                 // If reached the end of the matrix -> matrix is full.
-                if (index == n * n)
+                if (index == n * n + 1)
                     return true;
 
                 // If 2 rows are full and their sum doeas not match, go back one step.
-                if (index == 2 * n + 1 && grid.GetRowSum(1) != grid.GetRowSum(2))
+                if ( index > 1 && (index - 1) % n == 0 && grid.GetRowSum((index - 1) / n) != targetSum)
                     index--;
 
                 //Console.WriteLine("-----------------------------------");
