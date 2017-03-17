@@ -9,25 +9,13 @@ namespace DustInTheWind.MagicSquare
 
         public SolutionFile()
         {
-            streamWriter = new StreamWriter("solutions.txt");
+            string fileName = $"solutions - {DateTime.Now:yyyy MM dd HHmmss}.txt";
+            streamWriter = new StreamWriter(fileName);
         }
 
         public void DisplaySolution(Matrix grid)
         {
             streamWriter.WriteLine(grid.ToString());
-            //for (int i = 0; i < grid.N; i++)
-            //{
-            //    for (int j = 0; j < grid.N; j++)
-            //    {
-            //        streamWriter.Write(grid.Get(i, j));
-
-            //        if (j < grid.N - 1)
-            //            streamWriter.Write(" ");
-            //    }
-
-            //    streamWriter.WriteLine();
-            //}
-
             streamWriter.WriteLine();
         }
 

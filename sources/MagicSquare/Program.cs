@@ -28,7 +28,7 @@ namespace DustInTheWind.MagicSquare
 
             using (SolutionFile solutionFile = new SolutionFile())
             {
-                MagicSquare magicSquare = new MagicSquare(4);
+                MagicSquare magicSquare = new MagicSquare(5);
 
                 magicSquare.SolutionFound += (sender, e) =>
                 {
