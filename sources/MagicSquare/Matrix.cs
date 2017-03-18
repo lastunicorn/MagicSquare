@@ -10,7 +10,7 @@ namespace DustInTheWind.MagicSquare
     /// </summary>
     internal class Matrix
     {
-        private readonly int n;
+        public int N { get; }
         private readonly int[,] grid;
 
         private readonly int[] rowSums;
@@ -23,7 +23,7 @@ namespace DustInTheWind.MagicSquare
         {
             if (n < 3) throw new ArgumentOutOfRangeException(nameof(n));
 
-            this.n = n;
+            N = n;
 
             grid = new int[n, n];
 
@@ -33,18 +33,18 @@ namespace DustInTheWind.MagicSquare
 
         public void Set(int index, int value)
         {
-            int rowIndex = (index - 1) / n;
-            int columnIndex = (index - 1) % n;
+            int rowIndex = (index - 1) / N;
+            int columnIndex = (index - 1) % N;
 
             int oldValue = grid[rowIndex, columnIndex];
-            
+
             rowSums[rowIndex] = rowSums[rowIndex] - oldValue + value;
             columnSums[columnIndex] = columnSums[columnIndex] - oldValue + value;
 
             if (rowIndex == columnIndex)
                 D1Sum = D1Sum - oldValue + value;
 
-            if (rowIndex + columnIndex == n - 1)
+            if (rowIndex + columnIndex == N - 1)
                 D2Sum = D2Sum - oldValue + value;
 
             grid[rowIndex, columnIndex] = value;
@@ -52,16 +52,16 @@ namespace DustInTheWind.MagicSquare
 
         public int Get(int index)
         {
-            int rowIndex = (index - 1) / n;
-            int columnIndex = (index - 1) % n;
+            int rowIndex = (index - 1) / N;
+            int columnIndex = (index - 1) % N;
 
             return grid[rowIndex, columnIndex];
         }
 
         public void Clear()
         {
-            for (int i = 0; i < n; i++)
-                for (int j = 0; j < n; j++)
+            for (int i = 0; i < N; i++)
+                for (int j = 0; j < N; j++)
                     grid[i, j] = 0;
 
             for (int i = 0; i < rowSums.Length; i++)
@@ -73,7 +73,7 @@ namespace DustInTheWind.MagicSquare
             D1Sum = 0;
             D2Sum = 0;
         }
-        
+
         //public void CalculateSums()
         //{
         //    for (int i = 0; i < rowSums.Length; i++)
@@ -117,21 +117,40 @@ namespace DustInTheWind.MagicSquare
         {
             StringBuilder sb = new StringBuilder();
 
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < N; i++)
             {
-                for (int j = 0; j < n; j++)
+                for (int j = 0; j < N; j++)
                 {
                     sb.Append(grid[i, j]);
 
-                    if (j < n - 1)
+                    if (j < N - 1)
                         sb.Append(" ");
                 }
 
-                if (i < n - 1)
+                if (i < N - 1)
                     sb.AppendLine();
             }
 
             return sb.ToString();
+        }
+
+        public void Initialize(int[] initialValues)
+        {
+            for (int i = 0; i < initialValues.Length; i++)
+                Set(i + 1, initialValues[i]);
+        }
+
+        public int[,] ToArray()
+        {
+            int[,] array = new int[N, N];
+
+            for (int i = 0; i < N; i++)
+            {
+                for (int j = 0; j < N; j++)
+                    array[i, j] = grid[i, j];
+            }
+
+            return array;
         }
     }
 }

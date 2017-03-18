@@ -20,8 +20,9 @@ namespace DustInTheWind.MagicSquare
 {
     internal sealed class MagicSquare
     {
-        private readonly int n;
-        private readonly Matrix grid;
+        private readonly int[] initialValues;
+        private readonly int offset;
+        private readonly Matrix matrix;
         private readonly Tokens numbers;
         private readonly int targetSum;
 
@@ -31,11 +32,24 @@ namespace DustInTheWind.MagicSquare
         {
             if (n < 3) throw new ArgumentOutOfRangeException(nameof(n));
 
-            this.n = n;
-
-            grid = new Matrix(n);
+            matrix = new Matrix(n);
             numbers = new Tokens(1, n * n);
 
+            targetSum = (n * n + 1) * n / 2;
+        }
+
+        public MagicSquare(int n, int[] initialValues, int offset)
+        {
+            if (n < 3) throw new ArgumentOutOfRangeException(nameof(n));
+            if (initialValues == null) throw new ArgumentNullException(nameof(initialValues));
+            if (initialValues.Length != n * n) throw new ArgumentException("Initial values array must be of length " + n, nameof(initialValues));
+            if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
+
+            this.initialValues = initialValues;
+            this.offset = offset;
+
+            matrix = new Matrix(n);
+            numbers = new Tokens(1, n * n);
             targetSum = (n * n + 1) * n / 2;
         }
 
@@ -49,11 +63,11 @@ namespace DustInTheWind.MagicSquare
 
                 if (isValid)
                 {
-                    SolutionFoundEventArgs eva = new SolutionFoundEventArgs(grid);
+                    SolutionFoundEventArgs eva = new SolutionFoundEventArgs(matrix);
                     OnSolutionFound(eva);
                 }
 
-                bool nextStepSuccess = Increment(n * n);
+                bool nextStepSuccess = Increment(matrix.N * matrix.N);
 
                 if (!nextStepSuccess)
                     break;
@@ -63,25 +77,29 @@ namespace DustInTheWind.MagicSquare
         private void Initialize()
         {
             numbers.Clear();
-            grid.Clear();
-            Increment(1);
+            matrix.Clear();
+
+            if (initialValues != null)
+                matrix.Initialize(initialValues);
+
+            Increment(offset + 1);
         }
 
         private bool Validate()
         {
-            //grid.CalculateSums();
+            //matrix.CalculateSums();
 
-            int sum = grid.D1Sum;
+            int sum = matrix.D1Sum;
 
-            for (int i = 1; i <= n; i++)
-                if (grid.GetRowSum(i) != sum)
+            for (int i = 1; i <= matrix.N; i++)
+                if (matrix.GetRowSum(i) != sum)
                     return false;
 
-            for (int i = 1; i <= n; i++)
-                if (grid.GetColumnSum(i) != sum)
+            for (int i = 1; i <= matrix.N; i++)
+                if (matrix.GetColumnSum(i) != sum)
                     return false;
 
-            return grid.D2Sum == sum;
+            return matrix.D2Sum == sum;
         }
 
         private bool Increment(int index)
@@ -89,23 +107,20 @@ namespace DustInTheWind.MagicSquare
             while (true)
             {
                 // If reached the beggining of the matrix -> matrix cannot be filled.
-                if (index == 0)
+                if (index == offset)
                     return false;
 
                 // If reached the end of the matrix -> matrix is full.
-                if (index == n * n + 1)
+                if (index == matrix.N * matrix.N + 1)
                     return true;
 
                 // If 2 rows are full and their sum doeas not match, go back one step.
-                if ( index > 1 && (index - 1) % n == 0 && grid.GetRowSum((index - 1) / n) != targetSum)
+                if (index > 1 && (index - 1) % matrix.N == 0 && matrix.GetRowSum((index - 1) / matrix.N) != targetSum)
                     index--;
 
-                //Console.WriteLine("-----------------------------------");
-                //Console.WriteLine("index = " + index);
-                //Console.WriteLine();
-                //Console.WriteLine(grid.ToString());
+                // Release the current number.
 
-                int currentNumber = grid.Get(index);
+                int currentNumber = matrix.Get(index);
                 numbers.Free(currentNumber);
 
                 // Get the next number that can be used.
@@ -114,16 +129,12 @@ namespace DustInTheWind.MagicSquare
 
                 if (nextNumber.HasValue)
                 {
-                    grid.Set(index, nextNumber.Value);
-                    //Console.WriteLine(grid.ToString());
-
+                    matrix.Set(index, nextNumber.Value);
                     index++;
                 }
                 else
                 {
-                    grid.Set(index, 0);
-                    //Console.WriteLine(grid.ToString());
-
+                    matrix.Set(index, 0);
                     index--;
                 }
             }

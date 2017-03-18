@@ -16,6 +16,8 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace DustInTheWind.MagicSquare
 {
@@ -23,30 +25,81 @@ namespace DustInTheWind.MagicSquare
     {
         private static void Main()
         {
+            Run1();
+
+            Console.Write("Press any key to continue...");
+            Console.ReadKey(true);
+        }
+        
+        private static void Run1()
+        {
             int solutionCount = 0;
             Stopwatch stopWatch = Stopwatch.StartNew();
 
             using (SolutionFile solutionFile = new SolutionFile())
             {
-                MagicSquare magicSquare = new MagicSquare(5);
+                MagicSquare magicSquare = new MagicSquare(4);
 
                 magicSquare.SolutionFound += (sender, e) =>
                 {
                     solutionCount++;
-
-                    Console.WriteLine(e.Solution.ToString());
-                    Console.WriteLine();
-
-                    solutionFile.DisplaySolution(e.Solution);
+                    solutionFile.AddSolution(e.Solution);
                 };
 
                 magicSquare.Calculate();
 
                 solutionFile.WriteStatistics(solutionCount, stopWatch.Elapsed);
             }
+        }
 
-            Console.Write("Press any key to continue...");
-            Console.ReadKey(true);
+        private static void Run2()
+        {
+            int solutionCount = 0;
+            Stopwatch stopWatch = Stopwatch.StartNew();
+
+            using (SolutionFile solutionFile = new SolutionFile())
+            {
+                MagicSquare[] magicSquares = CreateMatrices(4);
+
+                Array.ForEach(magicSquares, x =>
+                {
+                    x.SolutionFound += (sender, e) =>
+                    {
+                        solutionCount++;
+                        solutionFile.AddSolution(e.Solution);
+                    };
+                });
+
+                Task[] tasks = magicSquares
+                    .Select(x =>
+                    {
+                        return Task.Run(() =>
+                        {
+                            x.Calculate();
+                        });
+                    })
+                    .ToArray();
+
+                Task.WaitAll(tasks);
+
+                solutionFile.Flush();
+                solutionFile.WriteStatistics(solutionCount, stopWatch.Elapsed);
+            }
+        }
+
+        internal static MagicSquare[] CreateMatrices(int n)
+        {
+            MagicSquare[] squares = new MagicSquare[n * n];
+
+            for (int i = 0; i < n * n; i++)
+            {
+                int[] initialValues = new int[n * n];
+                initialValues[0] = i + 1;
+
+                squares[i] = new MagicSquare(n, initialValues, 1);
+            }
+
+            return squares;
         }
     }
 }
